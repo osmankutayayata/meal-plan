@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en" data-day="training">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Meal Plan">
+<meta name="format-detection" content="telephone=no">
+<title>Meal Plan</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
+<script>
+  try { if (localStorage.getItem("mealPlanDay") === "rest") document.documentElement.setAttribute("data-day", "rest"); } catch (e) {}
+</script>
+<style>
+  :root {
+    --page: #f2f2f7;
+    --bar: #ffffff;
+    --card: #ffffff;
+    --text: #000000;
+    --amount: #000000;
+    --separator: rgba(60, 60, 67, 0.22);
+    --bar-line: rgba(0, 0, 0, 0.2);
+    --track: #ebebf0;
+    --accent: #4d1821;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --gutter: 20px;
+    --inset: 16px;
+    --radius: 14px;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page: #000000;
+      --bar: #000000;
+      --card: #1c1c1e;
+      --text: #ffffff;
+      --amount: #ffffff;
+      --separator: rgba(84, 84, 88, 0.6);
+      --bar-line: rgba(255, 255, 255, 0.16);
+      --track: #1c1c1e;
+      --accent: #a33346;
+    }
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html {
+    background: var(--bar);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    touch-action: pan-y;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--page);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    overflow-x: hidden;
+  }
+  .wrap { max-width: 600px; margin: 0 auto; }
+
+  /* Sticky tab bar. Its solid background also fills the status bar area. */
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bar);
+    border-bottom: 0.5px solid var(--bar-line);
+    padding: calc(var(--safe-top) + 8px) calc(var(--gutter) + var(--safe-right)) 12px calc(var(--gutter) + var(--safe-left));
+  }
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    padding: 3px;
+    border-radius: 13px;
+    background: var(--track);
+  }
+  .tab {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    border: 0;
+    border-radius: 10px;
+    min-height: 48px;
+    padding: 0 8px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background-color 0.18s ease, color 0.18s ease;
+  }
+  html[data-day="training"] #tab-training,
+  html[data-day="rest"] #tab-rest {
+    background: var(--accent);
+    color: #ffffff;
+  }
+  .tab:focus { outline: none; }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Meals */
+  main {
+    padding: 4px calc(var(--gutter) + var(--safe-right)) calc(var(--safe-bottom) + 36px) calc(var(--gutter) + var(--safe-left));
+  }
+  html[data-day="training"] #panel-rest,
+  html[data-day="rest"] #panel-training { display: none; }
+  .meal h2 {
+    margin: 26px 0 8px;
+    padding: 0 var(--inset);
+    font-size: 22px;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+  .card {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: var(--card);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .card li {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px var(--inset);
+    font-size: 19px;
+    line-height: 1.3;
+  }
+  .card li + li::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: var(--inset);
+    right: 0;
+    border-top: 0.5px solid var(--separator);
+  }
+  .food { min-width: 0; overflow-wrap: anywhere; }
+  .amt {
+    flex: none;
+    white-space: nowrap;
+    text-align: right;
+    color: var(--amount);
+    font-variant-numeric: tabular-nums;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tab { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <header class="bar">
+    <div class="wrap tabs" role="tablist" aria-label="Day">
+      <button class="tab" type="button" role="tab" id="tab-training" data-day="training" aria-controls="panel-training" aria-selected="true">Training Day</button>
+      <button class="tab" type="button" role="tab" id="tab-rest" data-day="rest" aria-controls="panel-rest" aria-selected="false">Rest Day</button>
+    </div>
+  </header>
+  <main>
+    <div class="wrap">
+    <div class="panel" id="panel-training" role="tabpanel" aria-labelledby="tab-training">
+      <section class="meal" aria-labelledby="training-meal-1">
+        <h2 id="training-meal-1">Meal 1</h2>
+        <ul class="card">
+          <li><span class="food">Soy Flakes</span><span class="amt">50 g</span></li>
+          <li><span class="food">Almond Milk</span><span class="amt">200 g</span></li>
+          <li><span class="food">Mixed Berries</span><span class="amt">300 g</span></li>
+          <li><span class="food">Walnuts</span><span class="amt">10 g</span></li>
+          <li><span class="food">Honey</span><span class="amt">25 g</span></li>
+          <li><span class="food">Iodized Salt</span><span class="amt">1 g</span></li>
+          <li><span class="food">Bonsalt</span><span class="amt">1 g</span></li>
+        </ul>
+      </section>
+      <section class="meal" aria-labelledby="training-meal-2">
+        <h2 id="training-meal-2">Meal 2</h2>
+        <ul class="card">
+          <li><span class="food">Tofu</span><span class="amt">180 g</span></li>
+          <li><span class="food">Sweet Potato</span><span class="amt">750 g</span></li>
+          <li><span class="food">Spinach</span><span class="amt">200 g</span></li>
+          <li><span class="food">Nutritional Yeast</span><span class="amt">10 g</span></li>
+          <li><span class="food">Iodized Salt</span><span class="amt">3 g</span></li>
+        </ul>
+      </section>
+      <section class="meal" aria-labelledby="training-meal-3">
+        <h2 id="training-meal-3">Meal 3</h2>
+        <ul class="card">
+          <li><span class="food">Tofu</span><span class="amt">90 g</span></li>
+          <li><span class="food">Basmati Rice</span><span class="amt">50 g</span></li>
+          <li><span class="food">Banana</span><span class="amt">100 g</span></li>
+          <li><span class="food">Iodized Salt</span><span class="amt">3 g</span></li>
+          <li><span class="food">Bonsalt</span><span class="amt">2 g</span></li>
+        </ul>
+      </section>
+      <section class="meal" aria-labelledby="training-meal-4">
+        <h2 id="training-meal-4">Meal 4</h2>
+        <ul class="card">
+          <li><span class="food">Dextrose</span><span class="amt">45 g</span></li>
+          <li><span class="food">Iodized Salt</span><span class="amt">1 g</span></li>
+          <li><span class="food">Bonsalt</span><span class="amt">1 g</span></li>
+        </ul>
+      </section>
+      <section class="meal" aria-labelledby="training-meal-5">
+        <h2 id="training-meal-5">Meal 5</h2>
+        <ul class="card">
+          <li><span class="food">Soy Flakes</span><span class="amt">50 g</span></li>
+          <li><span class="food">Oats</span><span class="amt">100 g</span></li>
+          <li><span class="food">Almond Milk</span><span class="amt">300 g</span></li>
+          <li><span class="food">Mixed Berries</span><span class="amt">100 g</span></li>
+          <li><span class="food">Brazil Nuts</span><span class="amt">5 g</span></li>
+          <li><span class="food">Pumpkin Seeds</span><span class="amt">20 g</span></li>
+        </ul>
+      </section>
+    </div>
+    <div class="panel" id="panel-rest" role="tabpanel" aria-labelledby="tab-rest">
+      <section class="meal" aria-labelledby="rest-meal-1">
+        <h2 id="rest-meal-1">Meal 1</h2>
+        <ul class="card">
+          <li><span class="food">Soy Flakes</span><span class="amt">50 g</span></li>
+          <li><span class="food">Almond Milk</span><span class="amt">300 g</span></li>
+          <li><span class="food">Walnuts</span><span class="amt">10 g</span></li>
+          <li><span class="food">Honey</span><span class="amt">25 g</span></li>
+          <li><span class="food">Iodized Salt</span><span class="amt">1 g</span></li>
+          <li><span class="food">Bonsalt</span><span class="amt">2 g</span></li>
+        </ul>
+      </section>
+      <section class="meal" aria-labelledby="rest-meal-2">
+        <h2 id="rest-meal-2">Meal 2</h2>
+        <ul class="card">
+          <li><span class="food">Tofu</span><span class="amt">180 g</span></li>
+          <li><span class="food">Sweet Potato</span><span class="amt">550 g</span></li>
+          <li><span class="food">Spinach</span><span class="amt">150 g</span></li>
+          <li><span class="food">Nutritional Yeast</span><span class="amt">10 g</span></li>
+          <li><span class="food">Iodized Salt</span><span class="amt">3 g</span></li>
+        </ul>
+      </section>
+      <section class="meal" aria-labelledby="rest-meal-3">
+        <h2 id="rest-meal-3">Meal 3</h2>
+        <ul class="card">
+          <li><span class="food">Basmati Rice</span><span class="amt">120 g</span></li>
+          <li><span class="food">Sweet Potato</span><span class="amt">200 g</span></li>
+          <li><span class="food">Broccoli</span><span class="amt">100 g</span></li>
+          <li><span class="food">Cauliflower</span><span class="amt">300 g</span></li>
+          <li><span class="food">Olive Oil</span><span class="amt">10 g</span></li>
+          <li><span class="food">Iodized Salt</span><span class="amt">3 g</span></li>
+          <li><span class="food">Bonsalt</span><span class="amt">2 g</span></li>
+        </ul>
+      </section>
+      <section class="meal" aria-labelledby="rest-meal-4">
+        <h2 id="rest-meal-4">Meal 4</h2>
+        <ul class="card">
+          <li><span class="food">Soy Flakes</span><span class="amt">50 g</span></li>
+          <li><span class="food">Oats</span><span class="amt">100 g</span></li>
+          <li><span class="food">Almond Milk</span><span class="amt">200 g</span></li>
+          <li><span class="food">Mixed Berries</span><span class="amt">100 g</span></li>
+          <li><span class="food">Brazil Nuts</span><span class="amt">5 g</span></li>
+          <li><span class="food">Pumpkin Seeds</span><span class="amt">20 g</span></li>
+          <li><span class="food">Honey</span><span class="amt">25 g</span></li>
+          <li><span class="food">Iodized Salt</span><span class="amt">1 g</span></li>
+        </ul>
+      </section>
+    </div>
+    </div>
+  </main>
+<script>
+  (function () {
+    var root = document.documentElement;
+    var tabs = document.querySelectorAll('[role="tab"]');
+    function select(day, focus) {
+      root.setAttribute("data-day", day);
+      for (var i = 0; i < tabs.length; i++) {
+        var on = tabs[i].getAttribute("data-day") === day;
+        tabs[i].setAttribute("aria-selected", on ? "true" : "false");
+        tabs[i].tabIndex = on ? 0 : -1;
+        if (on && focus) tabs[i].focus();
+      }
+      try { localStorage.setItem("mealPlanDay", day); } catch (e) {}
+    }
+    function show(day, focus) {
+      if (day === root.getAttribute("data-day")) return;
+      select(day, focus);
+      window.scrollTo(0, 0);
+    }
+    select(root.getAttribute("data-day") === "rest" ? "rest" : "training");
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].addEventListener("click", function () { show(this.getAttribute("data-day")); });
+      tabs[i].addEventListener("keydown", function (e) {
+        if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+          e.preventDefault();
+          show(this.getAttribute("data-day") === "rest" ? "training" : "rest", true);
+        }
+      });
+    }
+    // iOS: block pinch-zoom even where user-scalable=no is ignored.
+    document.addEventListener("gesturestart", function (e) { e.preventDefault(); }, { passive: false });
+  })();
+</script>
+</body>
+</html>
