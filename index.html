@@ -198,62 +198,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Store title with a tap-to-copy code on the right. The button keeps the title row at
-     26px (negative margins), so the 8px gap to the card stays the same as everywhere. */
-  .head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin: 26px 0 8px;
-  }
-  .head h2 { margin: 0; }
-  .code {
-    appearance: none;
-    -webkit-appearance: none;
-    position: relative;
-    flex: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 30px;
-    margin: -2px 0;
-    padding: 0 10px 0 12px;
-    border: 0;
-    border-radius: 9px;
-    background: var(--tab-off);
-    color: var(--text);
-    font: inherit;
-    font-size: 16px;
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    cursor: pointer;
-    touch-action: manipulation;
-  }
-  .code::after { content: ""; position: absolute; inset: -7px 0; }
-  .ico {
-    width: 16px;
-    height: 16px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  .ico-done, .code.copied .ico-copy { display: none; }
-  .code.copied .ico-done { display: block; }
-  .sr {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-    border: 0;
-  }
   @media (prefers-reduced-motion: reduce) {
     .tab { transition: none; }
   }
@@ -372,10 +316,7 @@
     </div>
     <div class="panel" id="panel-shopping" role="tabpanel" aria-labelledby="tab-shopping">
       <section class="meal" aria-labelledby="store-1">
-        <div class="head">
-          <h2 id="store-1">PENNY</h2>
-          <button class="code" type="button" data-code="Z516-J358-R367-D295" aria-label="Copy PENNY code Z516-J358-R367-D295"><span class="code-text">Z516-J358-R367-D295</span><svg class="ico ico-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V7a2.5 2.5 0 0 0-2.5-2.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5"/></svg><svg class="ico ico-done" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
-        </div>
+        <h2 id="store-1">PENNY</h2>
         <ul class="card">
           <li><span class="food">Bananas</span></li>
           <li><span class="food">Oats</span></li>
@@ -396,19 +337,6 @@
           <li><span class="food">Mixed Berries</span></li>
         </ul>
       </section>
-      <section class="meal" aria-labelledby="store-3">
-        <h2 id="store-3">Lidl</h2>
-        <ul class="card">
-          <li><span class="food">Tofu</span></li>
-        </ul>
-      </section>
-      <section class="meal" aria-labelledby="store-4">
-        <h2 id="store-4">Auchan</h2>
-        <ul class="card">
-          <li><span class="food">Sweet Potatoes</span></li>
-        </ul>
-      </section>
-      <p class="sr" id="copy-status" aria-live="polite"></p>
     </div>
     </div>
   </main>
@@ -443,45 +371,6 @@
           var n = order.indexOf(this.getAttribute("data-day")) + (e.key === "ArrowRight" ? 1 : order.length - 1);
           show(order[n % order.length], true);
         }
-      });
-    }
-
-    // Tap a code to copy it.
-    var status = document.getElementById("copy-status");
-    function fallbackCopy(text) {
-      var ta = document.createElement("textarea");
-      ta.value = text;
-      ta.setAttribute("readonly", "");
-      ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;-webkit-user-select:text;user-select:text";
-      document.body.appendChild(ta);
-      ta.select();
-      ta.setSelectionRange(0, text.length);
-      var ok = false;
-      try { ok = document.execCommand("copy"); } catch (e) {}
-      document.body.removeChild(ta);
-      return ok;
-    }
-    function copyText(text) {
-      if (navigator.clipboard && window.isSecureContext) {
-        return navigator.clipboard.writeText(text).catch(function () {
-          if (!fallbackCopy(text)) throw new Error("copy failed");
-        });
-      }
-      return fallbackCopy(text) ? Promise.resolve() : Promise.reject(new Error("copy failed"));
-    }
-    var codes = document.querySelectorAll(".code");
-    for (var j = 0; j < codes.length; j++) {
-      codes[j].addEventListener("click", function () {
-        var btn = this;
-        copyText(btn.getAttribute("data-code")).then(function () {
-          btn.classList.add("copied");
-          if (status) status.textContent = "Copied";
-          clearTimeout(btn._t);
-          btn._t = setTimeout(function () {
-            btn.classList.remove("copied");
-            if (status) status.textContent = "";
-          }, 1600);
-        }, function () {});
       });
     }
 
