@@ -28,7 +28,7 @@
     --amount: #000000;
     --separator: rgba(60, 60, 67, 0.22);
     --bar-line: rgba(0, 0, 0, 0.2);
-    --track: #ebebf0;
+    --tab-off: #e5e5ea;
     --accent: #4d1821;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-right: env(safe-area-inset-right, 0px);
@@ -37,7 +37,7 @@
     --gutter: 20px;
     --inset: 16px;
     --radius: 14px;
-    --bar-h: calc(var(--safe-top) + 74px);
+    --bar-h: calc(var(--safe-top) + 68px);
     color-scheme: light dark;
   }
   @media (prefers-color-scheme: dark) {
@@ -49,7 +49,7 @@
       --amount: #ffffff;
       --separator: rgba(84, 84, 88, 0.6);
       --bar-line: rgba(255, 255, 255, 0.16);
-      --track: #1c1c1e;
+      --tab-off: #2c2c2e;
       --accent: #a33346;
     }
   }
@@ -107,23 +107,21 @@
     height: 0.5px;
     background: var(--bar-line);
   }
+  /* Two separate buttons with a gap between them. */
   .tabs {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 3px;
-    padding: 3px;
-    border-radius: 13px;
-    background: var(--track);
+    gap: 10px;
   }
   .tab {
     appearance: none;
     -webkit-appearance: none;
     margin: 0;
     border: 0;
-    border-radius: 10px;
+    border-radius: 12px;
     min-height: 48px;
     padding: 0 8px;
-    background: transparent;
+    background: var(--tab-off);
     color: var(--text);
     font: inherit;
     font-size: 17px;
