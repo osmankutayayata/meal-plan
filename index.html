@@ -37,6 +37,7 @@
     --gutter: 20px;
     --inset: 16px;
     --radius: 14px;
+    --bar-h: calc(var(--safe-top) + 74px);
     color-scheme: light dark;
   }
   @media (prefers-color-scheme: dark) {
@@ -82,10 +83,16 @@
   }
   .wrap { max-width: 600px; margin: 0 auto; }
 
-  /* Tab bar, outside the scrolling area. Its solid background also fills the status bar area. */
+  /* Tab bar, outside the scrolling area. It is position: fixed, full width and opaque on
+     purpose: that is what iOS looks for at the top edge of a home screen web app to fill
+     the status bar with this colour instead of blurring the top of the page. */
   .bar {
-    flex: none;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    height: var(--bar-h);
     background: var(--bar);
     padding: calc(var(--safe-top) + 8px) calc(var(--gutter) + var(--safe-right)) 12px calc(var(--gutter) + var(--safe-left));
   }
@@ -137,6 +144,7 @@
   main {
     flex: 1 1 auto;
     min-height: 0;
+    margin-top: var(--bar-h);
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior-y: contain;
