@@ -53,7 +53,12 @@
     }
   }
   *, *::before, *::after { box-sizing: border-box; }
+  /* App shell: the page itself never scrolls, only <main> does, so the tab bar can't be
+     dragged away by iOS rubber-band scrolling. */
   html {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
     background: var(--bar);
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
@@ -61,8 +66,12 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
+    height: 100%;
     margin: 0;
-    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    overscroll-behavior: none;
     background: var(--page);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -70,18 +79,26 @@
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
-    overflow-x: hidden;
   }
   .wrap { max-width: 600px; margin: 0 auto; }
 
-  /* Sticky tab bar. Its solid background also fills the status bar area. */
+  /* Tab bar, outside the scrolling area. Its solid background also fills the status bar area. */
   .bar {
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    flex: none;
+    position: relative;
     background: var(--bar);
-    border-bottom: 0.5px solid var(--bar-line);
     padding: calc(var(--safe-top) + 8px) calc(var(--gutter) + var(--safe-right)) 12px calc(var(--gutter) + var(--safe-left));
+  }
+  /* Hairlines are 0.5px-tall boxes, not borders: WebKit floors thin borders to one device
+     pixel and can then round them away entirely at half-pixel positions. */
+  .bar::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 0.5px;
+    background: var(--bar-line);
   }
   .tabs {
     display: grid;
@@ -118,6 +135,12 @@
 
   /* Meals */
   main {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
     padding: 4px calc(var(--gutter) + var(--safe-right)) calc(var(--safe-bottom) + 36px) calc(var(--gutter) + var(--safe-left));
   }
   html[data-day="training"] #panel-rest,
@@ -126,7 +149,7 @@
     margin: 26px 0 8px;
     padding: 0 var(--inset);
     font-size: 22px;
-    line-height: 1.2;
+    line-height: 26px;
     font-weight: 700;
   }
   .card {
@@ -135,7 +158,6 @@
     padding: 0;
     background: var(--card);
     border-radius: var(--radius);
-    overflow: hidden;
   }
   .card li {
     position: relative;
@@ -145,7 +167,7 @@
     gap: 16px;
     padding: 14px var(--inset);
     font-size: 19px;
-    line-height: 1.3;
+    line-height: 25px;
   }
   .card li + li::before {
     content: "";
@@ -153,7 +175,8 @@
     top: 0;
     left: var(--inset);
     right: 0;
-    border-top: 0.5px solid var(--separator);
+    height: 0.5px;
+    background: var(--separator);
   }
   .food { min-width: 0; overflow-wrap: anywhere; }
   .amt {
@@ -283,6 +306,7 @@
 <script>
   (function () {
     var root = document.documentElement;
+    var main = document.querySelector("main");
     var tabs = document.querySelectorAll('[role="tab"]');
     function select(day, focus) {
       root.setAttribute("data-day", day);
@@ -297,7 +321,7 @@
     function show(day, focus) {
       if (day === root.getAttribute("data-day")) return;
       select(day, focus);
-      window.scrollTo(0, 0);
+      main.scrollTop = 0;
     }
     select(root.getAttribute("data-day") === "rest" ? "rest" : "training");
     for (var i = 0; i < tabs.length; i++) {
